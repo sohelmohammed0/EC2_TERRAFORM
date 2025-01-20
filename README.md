@@ -34,8 +34,8 @@ This repository contains the Terraform configuration to deploy an Ubuntu EC2 ins
 Clone this repository to your local machine:
 
 ```bash
-git clone <github-repo-url>
-cd <repository-folder>
+git clone https://github.com/sohelmohammed0/EC2_TERRAFORM
+cd EC2_TERRAFORM
 ```
 ![Clone Command Output](./images/gitclone.png)
 

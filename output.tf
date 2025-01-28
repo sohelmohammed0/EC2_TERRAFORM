@@ -1,14 +1,14 @@
-output "instance_id" {
-  description = "ID of the EC2 instance"
-  value       = aws_instance.web.id
+output "instance_ids" {
+  description = "IDs of the EC2 instances"
+  value       = [for instance in aws_instance.web : instance.id]
 }
 
-output "instance_public_ip" {
-  description = "Public IP of the EC2 instance"
-  value       = aws_instance.web.public_ip
+output "instance_public_ips" {
+  description = "Public IPs of the EC2 instances"
+  value       = [for instance in aws_instance.web : instance.public_ip]
 }
 
-output "ssh_command" {
-  description = "Command to SSH into the instance"
-  value       = "ssh -i ${var.key_name}.pem ubuntu@${aws_instance.web.public_ip}"
+output "ssh_commands" {
+  description = "Commands to SSH into the instances"
+  value       = [for instance in aws_instance.web : "ssh -i ${var.key_name}.pem ubuntu@${instance.public_ip}"]
 }

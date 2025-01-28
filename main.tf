@@ -59,8 +59,9 @@ resource "aws_security_group" "ec2_sg" {
   }
 }
 
-# EC2 Instance
+# EC2 Instances
 resource "aws_instance" "web" {
+  count                       = var.instance_count
   ami                         = var.ami_id
   instance_type               = var.instance_type
   key_name                    = var.key_name
@@ -76,7 +77,7 @@ resource "aws_instance" "web" {
   }
 
   tags = {
-    Name        = "${var.project_name}-instance"
+    Name        = "${var.project_name}-instance-${count.index + 1}"
     Environment = var.environment
     Owner       = var.owner
   }

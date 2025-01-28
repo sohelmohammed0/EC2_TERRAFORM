@@ -69,6 +69,8 @@ key_name         = "your-key-name"
 volume_size      = 8
 volume_type      = "gp3"
 encrypted_volume = true
+instance_count   = 2 # Specify the number of instances to deploy
+
 ```
 ![terraform.tfvars Configuration](./images/tfvars.png)
 
@@ -93,9 +95,9 @@ Type `yes` when prompted.
 ### 6. Retrieve Instance Details
 After successful deployment, Terraform will display:
 
-- Instance ID
-- Public IP
-- SSH Command
+- Instance IDs
+- Public IPs
+- SSH Commands
 
 Example output:
 
@@ -112,7 +114,7 @@ ssh_command = "ssh -i your-key-name.pem ubuntu@3.xx.xxx.xx"
 
 ### 7. Connect to the EC2 Instance
 
-Use the SSH command from the outputs to connect to the instance:
+Use the SSH commands from the outputs to connect to the instances:
 
 ```bash
 ssh -i your-key-name.pem ubuntu@<Public_IP>

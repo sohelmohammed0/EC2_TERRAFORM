@@ -9,4 +9,4 @@ key_name         = "useast"
 volume_size      = 8
 volume_type      = "gp3"
 encrypted_volume = true
-instance_count   = 3
+instance_count   = 2

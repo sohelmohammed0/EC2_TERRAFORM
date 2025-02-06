@@ -10,5 +10,5 @@ output "instance_public_ips" {
 
 output "ssh_commands" {
   description = "Commands to SSH into the instances"
-  value       = [for instance in aws_instance.web : "ssh -i ${var.key_name}.pem ubuntu@${instance.public_ip}"]
+  value       = [for instance in aws_instance.web : "ssh ubuntu@${instance.public_ip}"]
 }

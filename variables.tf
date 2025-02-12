@@ -57,3 +57,9 @@ variable "instance_count" {
   description = "Number of EC2 instances to create"
   type        = number
 }
+
+variable "security_group_names" {
+  description = "Names of the security groups to create"
+  type        = list(string)
+  default     = []
+}

@@ -20,40 +20,137 @@ data "aws_subnets" "default" {
   }
 }
 
-# Security Group
+# Predefined security group rules
+locals {
+  security_group_rules = {
+    ssh = {
+      description = "Security group for SSH"
+      ingress = [
+        {
+          from_port   = 22
+          to_port     = 22
+          protocol    = "tcp"
+          cidr_blocks = var.allowed_ssh_ips
+        }
+      ]
+      egress = [
+        {
+          from_port   = 0
+          to_port     = 0
+          protocol    = "-1"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+    }
+    http = {
+      description = "Security group for HTTP"
+      ingress = [
+        {
+          from_port   = 80
+          to_port     = 80
+          protocol    = "tcp"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+      egress = [
+        {
+          from_port   = 0
+          to_port     = 0
+          protocol    = "-1"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+    }
+    https = {
+      description = "Security group for HTTPS"
+      ingress = [
+        {
+          from_port   = 443
+          to_port     = 443
+          protocol    = "tcp"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+      egress = [
+        {
+          from_port   = 0
+          to_port     = 0
+          protocol    = "-1"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+    }
+    mysql = {
+      description = "Security group for MySQL"
+      ingress = [
+        {
+          from_port   = 3306
+          to_port     = 3306
+          protocol    = "tcp"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+      egress = [
+        {
+          from_port   = 0
+          to_port     = 0
+          protocol    = "-1"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+    }
+    rdp = {
+      description = "Security group for RDP"
+      ingress = [
+        {
+          from_port   = 3389
+          to_port     = 3389
+          protocol    = "tcp"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+      egress = [
+        {
+          from_port   = 0
+          to_port     = 0
+          protocol    = "-1"
+          cidr_blocks = ["0.0.0.0/0"]
+        }
+      ]
+    }
+  }
+}
+
+# Security Groups
 resource "aws_security_group" "ec2_sg" {
-  name        = "${var.project_name}-sg"
-  description = "Security group for ${var.project_name} EC2 instance"
+  for_each = { for name in var.security_group_names : name => local.security_group_rules[name] }
+
+  name        = each.key
+  description = each.value.description
   vpc_id      = data.aws_vpc.default.id
 
-  # SSH access
-  ingress {
-    description = "SSH Access"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = var.allowed_ssh_ips
+  dynamic "ingress" {
+    for_each = each.value.ingress
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
   }
 
-  # HTTP access
-  ingress {
-    description = "HTTP Access"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Outbound rules
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "egress" {
+    for_each = each.value.egress
+    content {
+      from_port   = egress.value.from_port
+      to_port     = egress.value.to_port
+      protocol    = egress.value.protocol
+      cidr_blocks = egress.value.cidr_blocks
+    }
   }
 
   tags = {
-    Name        = "${var.project_name}-sg"
+    Name        = each.key
     Environment = var.environment
     Owner       = var.owner
   }
@@ -66,7 +163,7 @@ resource "aws_instance" "web" {
   instance_type               = var.instance_type
   key_name                    = var.key_name
   subnet_id                   = tolist(data.aws_subnets.default.ids)[0]
-  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
+  vpc_security_group_ids      = [for sg in aws_security_group.ec2_sg : sg.id]
   associate_public_ip_address = true
 
   root_block_device {
